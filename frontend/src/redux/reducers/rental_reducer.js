@@ -12,6 +12,11 @@ export default function(state = initialState, action){
                 ...state,
                 rentals: action.payload
             }
+        case 'GET_RENTAL':
+            return {
+                ...state,
+                rental: action.payload
+            }
         case 'START':
             return {
                 ...state,

@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {connect} from "react-redux";
+import io from 'socket.io-client'
 import {logoutUser} from '../redux/actions/user_actions';
 import Map from "./Map";
 import BikeInfo from "./BikeInfo";
-import {startRental, finishRental, resetRentalError} from "../redux/actions/rental_actions";
+import Riding from "./Riding"
+import {startRental, resetRentalError} from "../redux/actions/rental_actions";
 import {newBikes} from '../redux/actions/bike_actions';
+import * as turf from "@turf/turf";
 
 class Main extends Component {
     constructor(props){
@@ -13,12 +16,23 @@ class Main extends Component {
         this.state = {
             number: "",
             code: "",
-            error: ""
+            error: "",
+            geolocation: []
         }
         this.logout = this.logout.bind(this);
         this.startRental = this.startRental.bind(this)
-        this.finishRental = this.finishRental.bind(this)
         this.addBikes = this.addBikes.bind(this)
+    }
+
+    componentDidMount() {
+        this.socket = io('/')
+        navigator.geolocation.getCurrentPosition((position) => {
+            const long = position.coords.longitude
+            const lat = position.coords.latitude
+            this.setState({
+                geolocation: [long, lat]
+            })
+        });
     }
 
     componentDidUpdate(prevProps) {
@@ -38,13 +52,10 @@ class Main extends Component {
         this.props.startRental(this.props.user.user.id, this.state.code)
     }
 
-    finishRental(){
-        this.props.finishRental(this.props.rental.rental.id, this.props.rental.rental.bikeId)
-    }
-
     addBikes(e){
         e.preventDefault()
         this.props.newBikes(parseInt(this.state.number))
+        this.socket.emit('refresh')
     }
 
     render() {
@@ -53,7 +64,7 @@ class Main extends Component {
                 return(
                     <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "space-around"}}>
                         <Map/>
-                        {this.props.bike.showBike ? <BikeInfo/> : null}
+                        {this.props.bike.showBike ? <BikeInfo geolocation={this.state.geolocation}/> : null}
                         <form onSubmit={this.addBikes} id="inputForm">
                             <div style={{paddingBottom: "20px"}}>
                                 <label style={{fontWeight: "bold"}}>Número de bicicletas</label>
@@ -73,16 +84,13 @@ class Main extends Component {
             } else {
                 if (this.props.rental.started) {
                     return(
-                        <div>
-                            <h2>Inicio: {new Date(this.props.rental.rental.start).toLocaleTimeString()}</h2>
-                            <button onClick={this.finishRental}>Finalizar viaje</button>
-                        </div>
+                        <Riding/>
                     );
                 } else {
                     return(
                         <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "space-around"}}>
                             <Map/>
-                            {this.props.bike.showBike ? <BikeInfo/> : null}
+                            {this.props.bike.showBike ? <BikeInfo geolocation={this.state.geolocation}/> : null}
                             <form onSubmit={this.startRental} id="inputForm">
                                 <div style={{paddingBottom: "20px"}}>
                                     <label style={{fontWeight: "bold"}}>Código de la bicicleta</label>
@@ -97,6 +105,7 @@ class Main extends Component {
                                 :
                                 <div id="error"><h5 style={{margin: "auto auto"}}>{this.state.error}</h5></div>
                             }
+                            <Link to="/rentals">Mis alquileres</Link>
                             {this.props.user.user.name}
                             <button onClick={this.logout}>Cerrar sesión</button>
                             <Link to="/profile">Editar perfil</Link>
@@ -119,4 +128,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps, {logoutUser, startRental, finishRental, resetRentalError, newBikes})(Main);
+export default connect(mapStateToProps, {logoutUser, startRental, resetRentalError, newBikes})(Main);

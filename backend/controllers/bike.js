@@ -68,3 +68,18 @@ exports.toggleLockBike = (req, res, next) => {
         })
         .catch(error => next(error));
 };
+
+exports.updatePosition = (req, res, next) => {
+    const id = req.params.bikeId;
+    const pos = req.body.pos;
+    models.bike.findByPk(id)
+        .then(bike => {
+            bike.long = pos[0]
+            bike.lat = pos[1]
+            bike.save({fields: ["lat", "long"]})
+                .then((bike) => {
+                    res.send(bike)
+                })
+        })
+        .catch(error => next(error));
+};

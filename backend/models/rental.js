@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
             },
             price: {
                 type: DataTypes.DOUBLE
+            },
+            route: {
+                type: DataTypes.TEXT
             }
         });
 

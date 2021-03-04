@@ -20,10 +20,13 @@ router.post('/bike/newBikes', bikeController.newBikes);
 router.get('/bike/getBikes', bikeController.getBikes);
 router.get('/bike/getBike/:bikeId', bikeController.getBike);
 router.put('/bike/toggleLockBike/:bikeId', bikeController.toggleLockBike);
+router.put('/bike/updatePos/:bikeId', bikeController.updatePosition);
 
 router.get('/rental/getRentals', rentalController.getRentals);
+router.get('/rental/getRentals/:userId', rentalController.getUserRentals);
 router.post('/rental/new', rentalController.newRental);
-router.put('/rental/finish', rentalController.finishRental);
+router.put('/rental/finish/:rentalId', rentalController.finishRental);
+router.put('/rental/updateRoute/:rentalId', rentalController.updateRoute);
 
 
 module.exports = router;

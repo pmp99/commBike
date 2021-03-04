@@ -41,7 +41,7 @@ export const finishRental = (rentalId, bikeId) => dispatch => {
         })
         return;
     }
-    axios.put('rental/finish', {rentalId})
+    axios.put('rental/finish/'+rentalId)
         .then(res => {
             dispatch({
                 type: 'FINISH',
@@ -60,9 +60,29 @@ export const getRentals = () => dispatch => {
         })
 }
 
+export const getUserRentals = (userId) => dispatch => {
+    axios.get('rental/getRentals/'+userId)
+        .then(res => {
+            dispatch({
+                type: 'GET_RENTALS',
+                payload: res.data
+            })
+        })
+}
+
 export const resetRentalError = () => dispatch => {
     dispatch({
         type: 'RESET_RENTAL_ERROR',
         payload: ""
     })
+}
+
+export const updateRoute = (id, route) => dispatch => {
+    axios.put('/rental/updateRoute/'+id, {route})
+        .then(res => {
+            dispatch({
+                type: 'GET_RENTAL',
+                payload: res.data
+            })
+        })
 }

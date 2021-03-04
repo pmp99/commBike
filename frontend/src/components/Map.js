@@ -3,6 +3,7 @@ import {connect} from "react-redux";
 import MapGL, { NavigationControl, GeolocateControl, ScaleControl, Source, Layer } from '@urbica/react-map-gl';
 import Cluster from '@urbica/react-map-gl-cluster';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import io from 'socket.io-client'
 import BikeMarker from './BikeMarker'
 import ClusterMarker from './ClusterMarker'
 import {getBikes, getBike, showBike, hideBike} from '../redux/actions/bike_actions';
@@ -44,6 +45,10 @@ class Map extends Component {
                     zona: zone.geometry.coordinates[0]
                 })
             })
+        this.socket = io('/')
+        this.socket.on('refresh', () => {
+            this.props.getBikes()
+        })
     }
 
     componentDidUpdate(prevProps) {

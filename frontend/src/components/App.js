@@ -18,7 +18,7 @@ class App extends React.Component {
                     <Route exact path="/register" render={() => !this.props.user.authenticated ? <Register/> : <Redirect to="/" />}/>
                     <Route exact path="/profile" render={() => this.props.user.authenticated ? <Profile/> : <Redirect to="/" />}/>
                     <Route exact path="/bikes" render={() => this.props.user.user.isAdmin ? <Bikes/> : <Redirect to="/" />}/>
-                    <Route exact path="/rentals" render={() => this.props.user.user.isAdmin ? <Rentals/> : <Redirect to="/" />}/>
+                    <Route exact path="/rentals" render={() => this.props.user.authenticated ? <Rentals/> : <Redirect to="/" />}/>
                     <Redirect to="/"/>
                 </Switch>
             </Router>

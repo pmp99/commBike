@@ -13,16 +13,12 @@ class BikeInfo extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.bike.bike !== this.props.bike.bike) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat1 = position.coords.latitude
-                const long1 = position.coords.longitude
-                const lat2 = this.props.bike.bike.lat
-                const long2 = this.props.bike.bike.long
-                let d = turf.distance(turf.point([long1, lat1]), turf.point([long2, lat2]))
-                this.setState({
-                    dist: d
-                })
-            });
+            const lat2 = this.props.bike.bike.lat
+            const long2 = this.props.bike.bike.long
+            let d = turf.distance(turf.point(this.props.geolocation), turf.point([long2, lat2]))
+            this.setState({
+                dist: d
+            })
         }
     }
 

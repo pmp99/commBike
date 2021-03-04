@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import {connect} from "react-redux";
+import io from 'socket.io-client'
 import {toggleLockBike, getBikes} from '../redux/actions/bike_actions'
 
 class Bikes extends Component {
@@ -17,6 +18,10 @@ class Bikes extends Component {
         this.setState({
             bikes: this.props.bike.bikes
         })
+        this.socket = io('/')
+        this.socket.on('refresh', () => {
+            this.props.getBikes()
+        })
     }
 
     componentDidUpdate(prevProps) {
@@ -33,22 +38,12 @@ class Bikes extends Component {
     toggleLockBike(id, e){
         e.preventDefault()
         this.props.toggleLockBike(id)
+        this.socket.emit('refresh')
     }
 
     sort(bikes, type) {
         switch (type) {
             case 0:
-                bikes.sort((a, b) => {
-                    if (a.locked) {
-                        return 1
-                    }
-                    if (a.inUse && !b.locked) {
-                        return 1
-                    }
-                    return -1
-                })
-                return(bikes)
-            case 1:
                 bikes.sort((a, b) => {
                     if (a.locked) {
                         return -1
@@ -57,6 +52,17 @@ class Bikes extends Component {
                         return -1
                     }
                     return 1
+                })
+                return(bikes)
+            case 1:
+                bikes.sort((a, b) => {
+                    if (a.locked) {
+                        return 1
+                    }
+                    if (a.inUse && !b.locked) {
+                        return 1
+                    }
+                    return -1
                 })
                 return(bikes)
             default:
@@ -82,8 +88,8 @@ class Bikes extends Component {
             <div>
                 <h7>Ordenar por: &nbsp;&nbsp;&nbsp;</h7>
                 <select id="sortBy" onChange={(e) => this.setState({sort: e.target.value})} value={this.state.sort}>
-                    <option value="0">Disponibilidad (+ a -)</option>
-                    <option value="1">Disponibilidad (- a +)</option>
+                    <option value="0">Disponibilidad (- a +)</option>
+                    <option value="1">Disponibilidad (+ a -)</option>
                 </select>
                 <table>
                     <tbody>

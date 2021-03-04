@@ -69,3 +69,13 @@ export const toggleLockBike = (id) => dispatch => {
             })
         })
 }
+
+export const updatePosition = (id, pos) => dispatch => {
+    axios.put('/bike/updatePos/'+id, {pos})
+        .then(res => {
+            dispatch({
+                type: 'GET_BIKE',
+                payload: res.data
+            })
+        })
+}

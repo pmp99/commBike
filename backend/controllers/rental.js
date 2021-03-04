@@ -19,12 +19,15 @@ exports.newRental = (req, res, next) => {
                     .then((bike) => {
                         const bikeId = bike.id
                         const start = Date.now()
+                        let route = [[bike.long, bike.lat]]
+                        route = JSON.stringify(route)
                         const rental = models.rental.build({
                             start,
+                            route,
                             userId,
                             bikeId
                         });
-                        rental.save({fields: ["start", "userId", "bikeId"]})
+                        rental.save({fields: ["start", "route", "userId", "bikeId"]})
                             .then(rental => {
                                 res.send(rental)
                             })
@@ -39,7 +42,7 @@ exports.newRental = (req, res, next) => {
 };
 
 exports.finishRental = (req, res, next) => {
-    const rentalId = req.body.rentalId;
+    const rentalId = req.params.rentalId;
     models.rental.findByPk(rentalId)
         .then(rental => {
             models.bike.findByPk(rental.bikeId)
@@ -63,6 +66,29 @@ exports.getRentals = (req, res, next) => {
     models.rental.findAll({include: {all: true}})
         .then(rentals => {
             res.send(rentals)
+        })
+        .catch(error => next(error));
+};
+
+exports.getUserRentals = (req, res, next) => {
+    const id = req.params.userId;
+    models.rental.findAll({where: {userId: id}, include: {all: true}})
+        .then(rentals => {
+            res.send(rentals)
+        })
+        .catch(error => next(error));
+};
+
+exports.updateRoute = (req, res, next) => {
+    const id = req.params.rentalId;
+    const route = req.body.route;
+    models.rental.findByPk(id)
+        .then(rental => {
+            rental.route = JSON.stringify(route)
+            rental.save({fields: ["route"]})
+                .then((rental) => {
+                    res.send(rental)
+                })
         })
         .catch(error => next(error));
 };
