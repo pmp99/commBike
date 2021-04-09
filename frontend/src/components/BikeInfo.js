@@ -1,6 +1,11 @@
 import React, {Component} from 'react'
 import {connect} from "react-redux";
+import {toggleLockBike, getBikes} from '../redux/actions/bike_actions'
+import io from 'socket.io-client'
 import * as turf from '@turf/turf'
+import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 class BikeInfo extends Component {
     constructor(props) {
@@ -9,6 +14,11 @@ class BikeInfo extends Component {
             dist: 0,
             code: ""
         }
+        this.toggleLockBike = this.toggleLockBike.bind(this)
+    }
+
+    componentDidMount() {
+        this.socket = io('/')
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -22,15 +32,37 @@ class BikeInfo extends Component {
         }
     }
 
+    toggleLockBike(id, e){
+        e.preventDefault()
+        this.props.toggleLockBike(id)
+        this.socket.emit('refresh')
+    }
+
     render() {
-        return(
-            <div>
-                <h2>{this.props.bike.bike.code}</h2>
-                {this.state.dist < 1 ? <h2>Distancia: {Math.round(1000*this.state.dist)} m</h2> :
-                    <h2>Distancia: {Math.round(10*this.state.dist)/10} km</h2>}
-                {this.props.bike.bike.locked && this.props.user.user.isAdmin ? <div>En uso por: ---</div> : null}
-            </div>
-        );
+        let bike = this.props.bike.bike
+        let color = bike.locked ? '#ff0606' : bike.inUse ? '#ff920a' : '#54ca13'
+        let borde = "4px solid " + color
+        let shadow = "0 0 20px 1px " + color
+        if (bike.id === undefined) {
+            return(
+                <div id="bikeInfo" style={{border: "4px solid gray", boxShadow: "0 0 20px 1px gray"}}>
+                    <CircularProgress color="black" style={{margin: 'auto'}} />
+                </div>
+            );
+        } else {
+            return(
+                <div id="bikeInfoContainer">
+                    <div id="bikeInfo" style={{border: borde, boxShadow: shadow}}>
+                        <h2 style={{margin: "auto"}}>{bike.code}</h2>
+                        {this.state.dist < 1 ? <h3 style={{margin: "auto"}}>Distancia: {Math.round(1000*this.state.dist)} m</h3> :
+                            <h3 style={{margin: "auto"}}>Distancia: {Math.round(10*this.state.dist)/10} km</h3>}
+                    </div>
+                    {this.props.user.user.isAdmin && !bike.inUse ? <button className="lockButton" onClick={(e) => this.toggleLockBike(bike.id, e)}>
+                        {bike.locked ? <LockIcon fontSize="large"/> : <LockOpenIcon fontSize="large"/>}
+                    </button> : null}
+                </div>
+            );
+        }
     }
 }
 
@@ -38,4 +70,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps)(BikeInfo);
+export default connect(mapStateToProps, {toggleLockBike, getBikes})(BikeInfo);

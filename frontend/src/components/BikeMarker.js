@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { Marker } from '@urbica/react-map-gl';
-import icon from '../assets/icon.svg'
+import DirectionsBikeIcon from '@material-ui/icons/DirectionsBike';
 
 export default class BikeMarker extends Component {
     constructor(props) {
@@ -15,7 +15,6 @@ export default class BikeMarker extends Component {
 
     render() {
         const style = {
-            color: '#fff',
             cursor: 'pointer',
             background: this.props.locked ? '#ff0606' : this.props.inUse ? '#ff920a' : '#54ca13',
             borderRadius: '50%',
@@ -23,7 +22,8 @@ export default class BikeMarker extends Component {
             width: '25px',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            border: this.props.selected ? '3px solid black' : '0px solid black'
         };
 
         return(
@@ -32,7 +32,7 @@ export default class BikeMarker extends Component {
                 latitude={this.props.latitude}
                 onClick={this.onMarkerClick}
             >
-                <div style={style}><img src={icon} style={{width: '75%', height: '75%'}}/></div>
+                <div style={style}><DirectionsBikeIcon fontSize="small"/></div>
             </Marker>
         );
     }

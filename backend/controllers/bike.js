@@ -27,7 +27,17 @@ const addBike = (pos) => {
     const lat = pos[1]
     const locked = false
     const inUse = false
-    const code = Math.floor(Math.random()*10000).toString()
+    let code = null;
+    let bici = null;
+    // Nos aseguramos de que la bicicleta creada tenga un código
+    // que no esté en uso
+    do {
+        code = Math.floor(Math.random()*10000).toString()
+        models.bike.findOne({where: {code: code}})
+            .then(bike => {
+                bici = bike
+            })
+    } while (bici !== null)
     const bike = models.bike.build({
         lat,
         long,
@@ -59,10 +69,10 @@ exports.toggleLockBike = (req, res, next) => {
         .then(bike => {
             bike.locked = !bike.locked
             bike.save({fields: ["locked"]})
-                .then(() => {
+                .then((bike) => {
                     models.bike.findAll()
                         .then((bikes) => {
-                            res.send(bikes)
+                            res.send({bikes: bikes, bike: bike})
                         })
                 })
         })

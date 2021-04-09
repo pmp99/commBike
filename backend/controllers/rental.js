@@ -52,7 +52,9 @@ exports.finishRental = (req, res, next) => {
                         .then(() => {
                             const end = Date.now()
                             rental.end = end
-                            rental.price = 1 + Math.round(100 * 0.25 * (end - rental.start) / 60000) / 100
+                            // PRECIO: 1€ + 0,25€/min
+                            let price = 1 + 0.25 * (end - rental.start) / 60000
+                            rental.price = parseFloat(price.toFixed(2))
                             rental.save({fields: ["end", "price"]})
                                 .then((rental) => {
                                     res.send(rental)

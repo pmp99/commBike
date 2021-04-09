@@ -12,12 +12,17 @@ export default function(state = initialState, action){
                 ...state,
                 bikes: action.payload,
                 update: false,
-                showBike: false
             }
         case 'GET_BIKE':
             return {
                 ...state,
                 bike: action.payload
+            }
+        case 'TOGGLE_LOCK':
+            return {
+                ...state,
+                bikes: action.payload.bikes,
+                bike: action.payload.bike
             }
         case 'SHOW_BIKE':
             return {

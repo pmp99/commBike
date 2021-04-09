@@ -1,14 +1,17 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
 import {connect} from "react-redux";
 import io from 'socket.io-client'
-import {logoutUser} from '../redux/actions/user_actions';
 import Map from "./Map";
 import BikeInfo from "./BikeInfo";
-import Riding from "./Riding"
+import Riding from "./Riding";
+import DialogAddBikes from "./DialogAddBikes";
+import DialogCode from "./DialogCode";
 import {startRental, resetRentalError} from "../redux/actions/rental_actions";
-import {newBikes} from '../redux/actions/bike_actions';
-import * as turf from "@turf/turf";
+import {newBikes, hideBike, resetBike} from '../redux/actions/bike_actions';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
 
 class Main extends Component {
     constructor(props){
@@ -16,12 +19,19 @@ class Main extends Component {
         this.state = {
             number: "",
             code: "",
-            error: "",
-            geolocation: []
+            geolocation: [],
+            addBikesDialogOpen: false,
+            codeDialogOpen: false
         }
-        this.logout = this.logout.bind(this);
+        this.login = this.login.bind(this)
+        this.register = this.register.bind(this)
         this.startRental = this.startRental.bind(this)
         this.addBikes = this.addBikes.bind(this)
+        this.handleCloseAddBikesDialog = this.handleCloseAddBikesDialog.bind(this)
+        this.handleChangeNumber = this.handleChangeNumber.bind(this)
+        this.handleCloseCodeDialog = this.handleCloseCodeDialog.bind(this)
+        this.handleChangeCode = this.handleChangeCode.bind(this)
+        this.closeAlert = this.closeAlert.bind(this)
     }
 
     componentDidMount() {
@@ -35,50 +45,94 @@ class Main extends Component {
         });
     }
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.rental.error !== this.props.rental.error) {
+    componentWillUnmount() {
+        this.props.hideBike()
+        this.props.resetBike()
+    }
+
+    login(){
+        this.props.history.push('/login')
+    }
+
+    register(){
+        this.props.history.push('/register')
+    }
+
+    startRental(){
+        this.setState({
+            codeDialogOpen: true,
+            code: ""
+        })
+    }
+
+    addBikes(){
+        this.setState({
+            addBikesDialogOpen: true
+        })
+    }
+
+    handleCloseAddBikesDialog(value){
+        if (value) {
             this.setState({
-                error: this.props.rental.error
+                addBikesDialogOpen: false
+            }, () => {
+                this.props.newBikes(parseInt(this.state.number))
+                this.socket.emit('refresh')
+            })
+        } else {
+            this.setState({
+                addBikesDialogOpen: false
             })
         }
     }
 
-    logout(){
-        this.props.logoutUser()
+    handleChangeNumber(event){
+        this.setState({
+            number: event.target.value
+        })
     }
 
-    startRental(e){
-        e.preventDefault()
-        this.props.startRental(this.props.user.user.id, this.state.code)
+    handleCloseCodeDialog(value){
+        if (value) {
+            this.setState({
+                codeDialogOpen: false
+            }, () => {
+                this.props.startRental(this.props.user.user.id, this.state.code)
+            })
+        } else {
+            this.setState({
+                codeDialogOpen: false
+            })
+        }
     }
 
-    addBikes(e){
-        e.preventDefault()
-        this.props.newBikes(parseInt(this.state.number))
-        this.socket.emit('refresh')
+    handleChangeCode(event){
+        this.setState({
+            code: event.target.value
+        })
+    }
+
+    closeAlert(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.props.resetRentalError()
     }
 
     render() {
         if (this.props.user.authenticated) {
             if (this.props.user.user.isAdmin) {
                 return(
-                    <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "space-around"}}>
+                    <div className="backgroundMap">
                         <Map/>
                         {this.props.bike.showBike ? <BikeInfo geolocation={this.state.geolocation}/> : null}
-                        <form onSubmit={this.addBikes} id="inputForm">
-                            <div style={{paddingBottom: "20px"}}>
-                                <label style={{fontWeight: "bold"}}>Número de bicicletas</label>
-                                <input type="number" min="1" step="1" className="form-control" onChange={(e) => this.setState({number: e.target.value})} required/>
-                            </div>
-                            {this.state.number === "" ?
-                                <input type="submit" value="Añadir" id="loginButtonDisabled"/> :
-                                <input type="submit" value="Añadir" id="loginButton"/>}
-                        </form>
-                        <Link to="/bikes">Ver bicicletas</Link>
-                        <Link to="/rentals">Ver alquileres</Link>
-                        {this.props.user.user.name}
-                        <button onClick={this.logout}>Cerrar sesión</button>
-                        <Link to="/profile">Editar perfil</Link>
+                        <Fab color="primary" variant="extended" style={{position: "absolute", bottom: "0", left: "0", margin: "10px", zIndex: "10"}} onClick={this.addBikes}>
+                            <AddIcon/>&nbsp; Añadir bicicletas
+                        </Fab>
+                        <DialogAddBikes open={this.state.addBikesDialogOpen}
+                        number={this.state.number}
+                        handleClose={this.handleCloseAddBikesDialog}
+                        handleChangeNumber={this.handleChangeNumber}/>
                     </div>
                     );
             } else {
@@ -88,36 +142,34 @@ class Main extends Component {
                     );
                 } else {
                     return(
-                        <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "space-around"}}>
+                        <div className="backgroundMap">
                             <Map/>
                             {this.props.bike.showBike ? <BikeInfo geolocation={this.state.geolocation}/> : null}
-                            <form onSubmit={this.startRental} id="inputForm">
-                                <div style={{paddingBottom: "20px"}}>
-                                    <label style={{fontWeight: "bold"}}>Código de la bicicleta</label>
-                                    <input type="number" className="form-control" onChange={(e) => {this.setState({code: e.target.value}); this.props.resetRentalError()}} required/>
-                                </div>
-                                {this.state.code === "" ?
-                                    <input type="submit" value="Alquilar" id="loginButtonDisabled"/> :
-                                    <input type="submit" value="Alquilar" id="loginButton"/>}
-                            </form>
-                            {this.state.error === "" ?
-                                <div style={{height: "8vh", backgroundColor: "#f0f0f0"}}/>
-                                :
-                                <div id="error"><h5 style={{margin: "auto auto"}}>{this.state.error}</h5></div>
-                            }
-                            <Link to="/rentals">Mis alquileres</Link>
-                            {this.props.user.user.name}
-                            <button onClick={this.logout}>Cerrar sesión</button>
-                            <Link to="/profile">Editar perfil</Link>
+                            <Fab color="primary" variant="extended" style={{position: "absolute", bottom: "0", left: "0", margin: "10px", zIndex: "10"}} onClick={this.startRental}>
+                                Alquilar
+                            </Fab>
+                            <DialogCode open={this.state.codeDialogOpen}
+                                            code={this.state.code}
+                                            handleClose={this.handleCloseCodeDialog}
+                                            handleChangeCode={this.handleChangeCode}/>
+                            <Snackbar open={this.props.rental.error !== ""} autoHideDuration={3000} onClose={this.closeAlert}>
+                                <MuiAlert onClose={this.closeAlert} severity="error" variant="filled">
+                                    {this.props.rental.error}
+                                </MuiAlert>
+                            </Snackbar>
                         </div>
                     );
                 }
             }
         } else {
             return(
-                <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "space-around"}}>
-                    <Link to="/login">Iniciar sesión</Link>
-                    <Link to="/register">Registrarse</Link>
+                <div className="background">
+                    <h1 id="title">commBike</h1>
+                    <div className="mainButtons">
+                        <button onClick={this.login} className="mainButton" id="loginButton">Iniciar sesión</button>
+                        <button onClick={this.register} className="mainButton" id="registerButton">Registrarse</button>
+                    </div>
+                    <h5 id="author">Creado por: ISST-Grupo 17</h5>
                 </div>
             );
         }
@@ -128,4 +180,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps, {logoutUser, startRental, resetRentalError, newBikes})(Main);
+export default connect(mapStateToProps, {startRental, resetRentalError, newBikes, hideBike, resetBike})(Main);

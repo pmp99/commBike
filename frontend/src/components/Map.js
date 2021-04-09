@@ -6,7 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import io from 'socket.io-client'
 import BikeMarker from './BikeMarker'
 import ClusterMarker from './ClusterMarker'
-import {getBikes, getBike, showBike, hideBike} from '../redux/actions/bike_actions';
+import {getBikes, getBike, showBike, hideBike, resetBike} from '../redux/actions/bike_actions';
 import {getZone} from '../assets/zone'
 
 class Map extends Component {
@@ -14,7 +14,6 @@ class Map extends Component {
         super(props);
         this.state = {
             bikes: [],
-            bike: {},
             viewport: {
                 latitude: 40.4474,
                 longitude: -3.6799,
@@ -48,6 +47,9 @@ class Map extends Component {
         this.socket = io('/')
         this.socket.on('refresh', () => {
             this.props.getBikes()
+            if (this.props.bike.bike.id !== undefined) {
+                this.props.getBike(this.props.bike.bike.id)
+            }
         })
     }
 
@@ -55,11 +57,14 @@ class Map extends Component {
         if (this.props.bike.update) {
             this.props.getBikes()
         }
-        if (prevProps.bike !== this.props.bike) {
+        if (prevProps.bike.bikes !== this.props.bike.bikes) {
             this.setState({
-                bikes: this.props.bike.bikes,
-                bike: this.props.bike.bike
+                bikes: this.props.bike.bikes
             })
+        }
+        if ((this.props.bike.bike.locked || this.props.bike.bike.inUse) && !this.props.user.user.isAdmin && this.props.bike.showBike) {
+            this.props.hideBike()
+            this.props.resetBike()
         }
     }
 
@@ -76,6 +81,7 @@ class Map extends Component {
 
     onMapClick(){
         this.props.hideBike()
+        this.props.resetBike()
     }
 
 
@@ -93,49 +99,51 @@ class Map extends Component {
 
         const bikeMarkers = this.state.bikes.map((bike) => {
             if (!(bike.locked || bike.inUse) || this.props.user.user.isAdmin) {
+                let selected = this.props.bike.showBike && this.props.bike.bike.id === bike.id
                 return(
                     <BikeMarker
-                        key={bike.id}
+                        key={bike.id + bike.locked.toString() + selected.toString()}
                         longitude={bike.long}
                         latitude={bike.lat}
                         id={bike.id}
                         locked={bike.locked}
                         inUse={bike.inUse}
+                        selected={selected}
                         onMarkerClick={this.onMarkerClick}/>
                 )
+            } else {
+                return null
             }
         })
 
         return (
-            <div>
-                <MapGL
-                    style={{ width: '100%', height: '400px' }}
-                    mapStyle='mapbox://styles/mapbox/streets-v11'
-                    accessToken={'pk.eyJ1IjoicG1wOTkiLCJhIjoiY2tsbTkzYWNxMDZ3OTMzbzhobnNsZ3o1YSJ9.mCi3-eRyASTCvR--ws9Ncg'}
-                    latitude={this.state.viewport.latitude}
-                    longitude={this.state.viewport.longitude}
-                    zoom={this.state.viewport.zoom}
-                    onViewportChange={this.setViewport}
-                    onClick={this.onMapClick}
-                >
-                    <NavigationControl showCompass showZoom position='top-right' />
-                    <GeolocateControl position='top-right' />
-                    <ScaleControl unit='metric' position='bottom-right' />
-                    <Source id='zone' type='geojson' data={zona} />
-                    <Layer
-                        id='zone'
-                        type='fill'
-                        source='zone'
-                        paint={{
-                            'fill-color': '#000000',
-                            'fill-opacity': 0.15
-                        }}
-                    />
-                    <Cluster radius={60} extent={512} nodeSize={64} component={ClusterMarker}>
-                        {bikeMarkers}
-                    </Cluster>
-                </MapGL>
-            </div>
+            <MapGL
+                style={{ width: '100%', height: '100%' }}
+                mapStyle='mapbox://styles/mapbox/streets-v11'
+                accessToken={'pk.eyJ1IjoicG1wOTkiLCJhIjoiY2tsbTkzYWNxMDZ3OTMzbzhobnNsZ3o1YSJ9.mCi3-eRyASTCvR--ws9Ncg'}
+                latitude={this.state.viewport.latitude}
+                longitude={this.state.viewport.longitude}
+                zoom={this.state.viewport.zoom}
+                onViewportChange={this.setViewport}
+                onClick={this.onMapClick}
+            >
+                <NavigationControl showCompass showZoom position='top-right' />
+                <GeolocateControl position='top-right' />
+                <ScaleControl unit='metric' position='bottom-right' />
+                <Source id='zone' type='geojson' data={zona} />
+                <Layer
+                    id='zone'
+                    type='fill'
+                    source='zone'
+                    paint={{
+                        'fill-color': '#000000',
+                        'fill-opacity': 0.15
+                    }}
+                />
+                <Cluster radius={60} extent={512} nodeSize={64} component={ClusterMarker}>
+                    {bikeMarkers}
+                </Cluster>
+            </MapGL>
         );
     }
 }
@@ -144,4 +152,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps, {getBikes, getBike, showBike, hideBike})(Map);
+export default connect(mapStateToProps, {getBikes, getBike, showBike, hideBike, resetBike})(Map);

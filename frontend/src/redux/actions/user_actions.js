@@ -8,7 +8,7 @@ export const loginUser = user => dispatch => {
         .then(res => {
             if (!res.data) {
                 dispatch({
-                    type: 'ERROR',
+                    type: 'USER_ERROR',
                     payload: "Datos de inicio de sesión incorrectos"
                 })
             } else {
@@ -46,7 +46,7 @@ export const registerUser = user => dispatch => {
                 dispatch(setUser(session.user))
             } else{
                 dispatch({
-                    type: 'ERROR',
+                    type: 'USER_ERROR',
                     payload: res.data.data
                 })
             }
@@ -87,7 +87,11 @@ export const editUser = (user, id) => dispatch => {
                 }
             }
             localStorage.setItem("session", JSON.stringify(session))
-            dispatch(setUser(session.user));
+            dispatch(setUser(session.user))
+            dispatch({
+                type: 'USER_SUCCESS',
+                payload: "Usuario modificado con éxito"
+            })
         })
 }
 
@@ -99,7 +103,7 @@ export const changePassword = (passwords, id) => dispatch => {
         .then(res => {
             if (!res.data.success) {
                 dispatch({
-                    type: 'ERROR',
+                    type: 'USER_ERROR',
                     payload: res.data.data
                 })
             } else {
@@ -113,13 +117,24 @@ export const changePassword = (passwords, id) => dispatch => {
                 }
                 localStorage.setItem("session", JSON.stringify(session))
                 dispatch(setUser(session.user))
+                dispatch({
+                    type: 'USER_SUCCESS',
+                    payload: "Contraseña modificada con éxito"
+                })
             }
         })
 }
 
 export const resetUserError = () => dispatch => {
     dispatch({
-        type: 'ERROR',
+        type: 'USER_ERROR',
+        payload: ""
+    })
+}
+
+export const resetUserSuccess = () => dispatch => {
+    dispatch({
+        type: 'USER_SUCCESS',
         payload: ""
     })
 }

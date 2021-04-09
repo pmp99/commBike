@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import {registerUser, resetUserError} from '../redux/actions/user_actions';
 import {connect} from "react-redux";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 
 class Register extends Component {
     constructor(props){
@@ -9,18 +11,10 @@ class Register extends Component {
         this.state = {
             email: "",
             password: "",
-            password2: "",
-            error: ""
+            password2: ""
         }
-        this.register = this.register.bind(this);
-    }
-
-    componentDidUpdate(prevProps){
-        if (this.props.user.error !== prevProps.user.error) {
-            this.setState({
-                error: this.props.user.error
-            })
-        }
+        this.register = this.register.bind(this)
+        this.closeAlert = this.closeAlert.bind(this)
     }
 
     register(e){
@@ -33,41 +27,45 @@ class Register extends Component {
         };
         this.props.registerUser(user)
     }
+
+    closeAlert(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.props.resetUserError()
+    }
+
     render() {
         return(
-            <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "space-between"}}>
-                <h1 style={{textAlign: "center", padding: "10px", marginBottom: "auto"}}>Crear una cuenta</h1>
-                <div style={{marginBottom: "auto"}}>
+            <div className="background">
+                <div className="loginForm">
+                    <h1 className="formTitle">CREAR UNA CUENTA</h1>
                     <form onSubmit={this.register} id="inputForm">
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Nombre</label>
-                            <input type="text" className="form-control" onChange={(e) => {this.setState({name: e.target.value}); this.props.resetUserError()}} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Nombre</label>
+                            <input type="text" className="form-control" onChange={(e) => {this.setState({name: e.target.value})}} required/>
                         </div>
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Correo electrónico</label>
-                            <input type="email" className="form-control" onChange={(e) => {this.setState({email: e.target.value}); this.props.resetUserError()}} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Correo electrónico</label>
+                            <input type="email" className="form-control" onChange={(e) => {this.setState({email: e.target.value})}} required/>
                         </div>
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Contraseña</label>
-                            <input type="password" className="form-control" onChange={(e) => {this.setState({password: e.target.value}); this.props.resetUserError()}} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Contraseña</label>
+                            <input type="password" className="form-control" onChange={(e) => {this.setState({password: e.target.value})}} required/>
                         </div>
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Repita la contraseña</label>
-                            <input type="password" className="form-control" onChange={(e) => {this.setState({password2: e.target.value}); this.props.resetUserError()}} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Repita la contraseña</label>
+                            <input type="password" className="form-control" onChange={(e) => {this.setState({password2: e.target.value})}} required/>
                         </div>
-                        {this.state.name === "" || this.state.password === "" || this.state.password2 === "" || this.state.email === "" ?
-                            <input type="submit" value="Crear cuenta" id="loginButtonDisabled"/> :
-                            <input type="submit" value="Crear cuenta" id="loginButton"/>}
+                        <input type="submit" value="Crear cuenta" id="formButton"/>
                     </form>
-                    <div id="loginAux">
-                        <div style={{margin: "auto auto"}}><h6>¿Ya tienes una cuenta?&nbsp;</h6><Link to={'/login'}>Inicia sesión</Link></div>
-                    </div>
+                    <div id="loginAux"><h6>¿Ya tienes una cuenta? <Link id="loginAuxLink" to={'/login'}>Inicia sesión</Link></h6></div>
                 </div>
-                {this.state.error === "" ?
-                    <div style={{height: "8vh", backgroundColor: "#f0f0f0"}}/>
-                    :
-                    <div id="error"><h5 style={{margin: "auto auto"}}>{this.state.error}</h5></div>
-                }
+                <Snackbar open={this.props.user.error !== ""} autoHideDuration={3000} onClose={this.closeAlert}>
+                    <MuiAlert onClose={this.closeAlert} severity="error" variant="filled">
+                        {this.props.user.error}
+                    </MuiAlert>
+                </Snackbar>
             </div>
         );
     }

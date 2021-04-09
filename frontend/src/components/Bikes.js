@@ -2,6 +2,10 @@ import React, {Component} from 'react'
 import {connect} from "react-redux";
 import io from 'socket.io-client'
 import {toggleLockBike, getBikes} from '../redux/actions/bike_actions'
+import SortIcon from "@material-ui/icons/Sort";
+import LockIcon from "@material-ui/icons/Lock";
+import LockOpenIcon from "@material-ui/icons/LockOpen";
+import DirectionsBikeIcon from "@material-ui/icons/DirectionsBike";
 
 class Bikes extends Component {
     constructor(props) {
@@ -65,6 +69,11 @@ class Bikes extends Component {
                     return -1
                 })
                 return(bikes)
+            case 2:
+                bikes.sort((a, b) => {
+                    return parseInt(a.code) - parseInt(b.code)
+                })
+                return(bikes)
             default:
                 return(bikes)
         }
@@ -73,29 +82,40 @@ class Bikes extends Component {
     render() {
         const bikes = this.sort(this.state.bikes, parseInt(this.state.sort))
         const bikeList = bikes.map((bike) => {
-            const style = {
-                backgroundColor: bike.locked ? '#ff0606' : bike.inUse ? '#ff920a' : '#54ca13'
-            }
-            const text = bike.locked ? "Desbloquear" : "Bloquear"
+            const backgroundColor = bike.locked ? '#ff0606' : bike.inUse ? '#ff920a' : '#54ca13'
             return (
-                <tr key={bike.id} style={style}>
-                    Long: {bike.long} Lat: {bike.lat} Código: {bike.code}
-                    {!bike.inUse ? <button onClick={(e) => this.toggleLockBike(bike.id, e)}>{text}</button> : null}
-                </tr>
+                <div key={bike.id} className="bike" style={{backgroundColor: backgroundColor}}>
+                    <div className="bikeLocation">
+                        <h6 style={{margin: 'auto'}}>Lat: {bike.lat.toFixed(5)}</h6>
+                        <h6 style={{margin: 'auto'}}>Long: {bike.long.toFixed(5)}</h6>
+                    </div>
+                    <div className="rentalBike">
+                        <DirectionsBikeIcon/><h5 className="rentalBikeText">{bike.code}</h5>
+                    </div>
+                    {!bike.inUse ? <button className="lockButtonSmall" onClick={(e) => this.toggleLockBike(bike.id, e)}>
+                        {bike.locked ? <LockIcon/> : <LockOpenIcon/>}
+                    </button> : <div className="emptyButton"/>}
+                </div>
             )
         })
         return(
-            <div>
-                <h7>Ordenar por: &nbsp;&nbsp;&nbsp;</h7>
-                <select id="sortBy" onChange={(e) => this.setState({sort: e.target.value})} value={this.state.sort}>
-                    <option value="0">Disponibilidad (- a +)</option>
-                    <option value="1">Disponibilidad (+ a -)</option>
-                </select>
-                <table>
-                    <tbody>
-                    {bikeList}
-                    </tbody>
-                </table>
+            <div className="background">
+                <div style={{display: "flex", justifyContent: "space-between", width: "80%", margin: "20px"}}>
+                    <div className="sortByBox">
+                        <SortIcon/>
+                        <select className="sortBy" onChange={(e) => this.setState({sort: e.target.value})} value={this.state.sort}>
+                            <option value="0">Disponibilidad (- a +)</option>
+                            <option value="1">Disponibilidad (+ a -)</option>
+                            <option value="2">Código</option>
+                        </select>
+                    </div>
+                </div>
+                {bikes.length === 0 ?
+                    <h2>No hay bicicletas</h2> :
+                    <div id="bikeGrid">
+                        {bikeList}
+                    </div>
+                }
             </div>
         );
     }

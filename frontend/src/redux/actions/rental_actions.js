@@ -72,7 +72,7 @@ export const getUserRentals = (userId) => dispatch => {
 
 export const resetRentalError = () => dispatch => {
     dispatch({
-        type: 'RESET_RENTAL_ERROR',
+        type: 'RENTAL_ERROR',
         payload: ""
     })
 }

@@ -1,6 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {editUser, changePassword} from '../redux/actions/user_actions';
+import {editUser, changePassword, resetUserError, resetUserSuccess} from '../redux/actions/user_actions';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 
 class Profile extends React.Component {
     constructor(props){
@@ -10,11 +12,12 @@ class Profile extends React.Component {
             email: "",
             oldPassword: "",
             newPassword: "",
-            newPassword2: "",
-            error: ""
+            newPassword2: ""
         }
-        this.editUser = this.editUser.bind(this);
-        this.changePassword = this.changePassword.bind(this);
+        this.editUser = this.editUser.bind(this)
+        this.changePassword = this.changePassword.bind(this)
+        this.closeAlert = this.closeAlert.bind(this)
+        this.closeAlertSuccess = this.closeAlertSuccess.bind(this)
     }
 
     componentDidMount() {
@@ -24,12 +27,28 @@ class Profile extends React.Component {
         })
     }
 
-    componentDidUpdate(prevProps){
-        if (this.props.user.error !== prevProps.user.error) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.user.success === "" && this.props.user.success !== "") {
             this.setState({
-                error: this.props.user.error
+                oldPassword: "",
+                newPassword: "",
+                newPassword2: ""
             })
         }
+    }
+
+    closeAlert(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.props.resetUserError()
+    }
+
+    closeAlertSuccess(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.props.resetUserSuccess()
     }
 
     editUser(e){
@@ -55,45 +74,46 @@ class Profile extends React.Component {
 
     render() {
         return(
-            <div style={{height: "100vh", backgroundColor: "#f0f0f0", display: "flex", flexDirection: "column", justifyContent: "start"}}>
-                <div><h1 style={{textAlign: "center", padding: "10px", marginBottom: "auto"}}>Editar usuario</h1></div>
-                <div style={{marginTop: "100px"}}>
+            <div className="background">
+                <div className="loginForm">
+                    <h1 className="formTitle">EDITAR USUARIO</h1>
                     <form onSubmit={this.editUser} id="inputForm">
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Nombre</label>
+                        <div className="inputBox">
+                            <label className="labelForm">Nombre</label>
                             <input type="text" className="form-control" onChange={(e) => this.setState({name: e.target.value})} value={this.state.name} required/>
                         </div>
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Correo electrónico</label>
+                        <div className="inputBox">
+                            <label className="labelForm">Correo electrónico</label>
                             <input type="email" className="form-control" onChange={(e) => this.setState({email: e.target.value})} value={this.state.email} required/>
                         </div>
-                        {this.state.name === this.props.user.user.name && this.state.email === this.props.user.user.email ?
-                            <input type="submit" value="Guardar cambios" id="loginButtonDisabled"/> :
-                            <input type="submit" value="Guardar cambios" id="loginButton"/>}
+                        <input type="submit" value="Guardar cambios" id="formButton" disabled={this.state.name === this.props.user.user.name && this.state.email === this.props.user.user.email}/>
                     </form>
                     <form onSubmit={this.changePassword} id="inputForm">
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Contraseña antigua</label>
-                            <input type="password" className="form-control" onChange={(e) => this.setState({oldPassword: e.target.value, error: ""})} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Contraseña antigua</label>
+                            <input type="password" className="form-control" onChange={(e) => this.setState({oldPassword: e.target.value})} value={this.state.oldPassword} required/>
                         </div>
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Nueva contraseña</label>
-                            <input type="password" className="form-control" onChange={(e) => this.setState({newPassword: e.target.value, error: ""})} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Nueva contraseña</label>
+                            <input type="password" className="form-control" onChange={(e) => this.setState({newPassword: e.target.value})} value={this.state.newPassword} required/>
                         </div>
-                        <div style={{paddingBottom: "20px"}}>
-                            <label style={{fontWeight: "bold"}}>Repita la contraseña</label>
-                            <input type="password" className="form-control" onChange={(e) => this.setState({newPassword2: e.target.value, error: ""})} required/>
+                        <div className="inputBox">
+                            <label className="labelForm">Repita la contraseña</label>
+                            <input type="password" className="form-control" onChange={(e) => this.setState({newPassword2: e.target.value})} value={this.state.newPassword2} required/>
                         </div>
-                        {this.state.oldPassword === "" || this.state.newPassword === "" || this.state.newPassword2 === "" || this.state.newPassword === this.state.oldPassword ?
-                            <input type="submit" value="Modificar contraseña" id="loginButtonDisabled"/> :
-                            <input type="submit" value="Modificar contraseña" id="loginButton"/>}
+                        <input type="submit" value="Modificar contraseña" id="formButton" disabled={this.state.newPassword === this.state.oldPassword}/>
                     </form>
                 </div>
-                {this.state.error === "" ?
-                    <div style={{height: "8vh", backgroundColor: "#f0f0f0"}}/>
-                    :
-                    <div id="error"><h5 style={{margin: "auto auto"}}>{this.state.error}</h5></div>
-                }
+                <Snackbar open={this.props.user.error !== ""} autoHideDuration={3000} onClose={this.closeAlert}>
+                    <MuiAlert onClose={this.closeAlert} severity="error" variant="filled">
+                        {this.props.user.error}
+                    </MuiAlert>
+                </Snackbar>
+                <Snackbar open={this.props.user.success !== ""} autoHideDuration={3000} onClose={this.closeAlertSuccess}>
+                    <MuiAlert onClose={this.closeAlertSuccess} severity="success" variant="filled">
+                        {this.props.user.success}
+                    </MuiAlert>
+                </Snackbar>
             </div>
         );
     }
@@ -104,4 +124,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps, {editUser, changePassword})(Profile);
+export default connect(mapStateToProps, {editUser, changePassword, resetUserError, resetUserSuccess})(Profile);

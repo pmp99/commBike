@@ -22,6 +22,13 @@ export const getBike = (id) => dispatch => {
         })
 }
 
+export const resetBike = () => dispatch => {
+        dispatch({
+            type: 'GET_BIKE',
+            payload: {}
+        })
+}
+
 export const showBike = () => dispatch => {
         dispatch({
             type: 'SHOW_BIKE'
@@ -64,7 +71,7 @@ export const toggleLockBike = (id) => dispatch => {
     axios.put('/bike/toggleLockBike/'+id)
         .then(res => {
             dispatch({
-                type: 'GET_BIKES',
+                type: 'TOGGLE_LOCK',
                 payload: res.data
             })
         })

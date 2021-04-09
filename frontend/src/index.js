@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './styles/index.css';
+import './assets/Amethyst 400.ttf'
+import './assets/Novecento NarrowLight.otf'
 import ReduxProvider from "./redux/ReduxProvider";
 import reportWebVitals from './reportWebVitals';
 

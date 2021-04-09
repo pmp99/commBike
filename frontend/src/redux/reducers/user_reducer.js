@@ -1,7 +1,8 @@
 const initialState = {
     authenticated: false,
     user: {},
-    error: ""
+    error: "",
+    success: ""
 }
 
 export default function(state = initialState, action){
@@ -12,10 +13,15 @@ export default function(state = initialState, action){
                 authenticated: !isEmpty(action.payload),
                 user: action.payload
             }
-        case 'ERROR':
+        case 'USER_ERROR':
             return {
                 ...state,
                 error: action.payload
+            }
+        case 'USER_SUCCESS':
+            return {
+                ...state,
+                success: action.payload
             }
         default:
             return state;
