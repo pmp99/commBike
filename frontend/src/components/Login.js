@@ -34,7 +34,7 @@ class Login extends Component {
 
     render() {
         return(
-            <div className="background">
+            <div className="backgroundMain">
                 <div className="loginForm">
                     <h1 className="formTitle">INICIAR SESIÓN</h1>
                     <form onSubmit={this.login} id="inputForm">

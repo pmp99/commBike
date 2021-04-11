@@ -6,7 +6,7 @@ import BikeInfo from "./BikeInfo";
 import Riding from "./Riding";
 import DialogAddBikes from "./DialogAddBikes";
 import DialogCode from "./DialogCode";
-import {startRental, resetRentalError} from "../redux/actions/rental_actions";
+import {startRental, checkActiveRental, resetRentalError} from "../redux/actions/rental_actions";
 import {newBikes, hideBike, resetBike} from '../redux/actions/bike_actions';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
@@ -43,6 +43,9 @@ class Main extends Component {
                 geolocation: [long, lat]
             })
         });
+        if (this.props.user.authenticated) {
+            this.props.checkActiveRental(this.props.user.user.id)
+        }
     }
 
     componentWillUnmount() {
@@ -163,11 +166,11 @@ class Main extends Component {
             }
         } else {
             return(
-                <div className="background">
+                <div className="backgroundMain">
                     <h1 id="title">commBike</h1>
                     <div className="mainButtons">
-                        <button onClick={this.login} className="mainButton" id="loginButton">Iniciar sesión</button>
-                        <button onClick={this.register} className="mainButton" id="registerButton">Registrarse</button>
+                        <button onClick={this.login} className="mainButton">Iniciar sesión</button>
+                        <button onClick={this.register} className="mainButton">Registrarse</button>
                     </div>
                     <h5 id="author">Creado por: ISST-Grupo 17</h5>
                 </div>
@@ -180,4 +183,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps, {startRental, resetRentalError, newBikes, hideBike, resetBike})(Main);
+export default connect(mapStateToProps, {startRental, checkActiveRental, resetRentalError, newBikes, hideBike, resetBike})(Main);

@@ -74,7 +74,7 @@ class Profile extends React.Component {
 
     render() {
         return(
-            <div className="background">
+            <div className="backgroundMain">
                 <div className="loginForm">
                     <h1 className="formTitle">EDITAR USUARIO</h1>
                     <form onSubmit={this.editUser} id="inputForm">

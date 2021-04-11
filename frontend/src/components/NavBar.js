@@ -50,7 +50,7 @@ class NavBar extends Component {
                 <nav id="navBar">
                     <button id="homeButton" onClick={() => this.props.history.push('/')}><img src={logo} alt="Logo" style={{height: "100%"}}/></button>
                     {this.props.user.user.isAdmin ? <button className="navButton" onClick={() => this.props.history.push('/bikes')}><h5 className="navButtonText">Bicicletas</h5></button> : null}
-                    <button className="navButton" style={{marginRight: "auto"}} onClick={() => this.props.history.push('/rentals')}><h5 className="navButtonText">Alquileres</h5></button>
+                    <button className="navButton" style={{marginRight: "auto"}} onClick={() => this.props.history.push('/rentals')}><h5 className="navButtonText">{this.props.user.user.isAdmin ? 'Viajes' : 'Mis viajes'}</h5></button>
                     <div className="dropdown">
                         <button className="dropbtn" onMouseEnter={this.drop}><div style={{display: "flex", justifyContent: "center"}}>{this.props.user.user.name}<ArrowDropDownIcon/></div></button>
                         <div className="dropdown-content" id="myDropdown">

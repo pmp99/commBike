@@ -27,6 +27,7 @@ router.get('/rental/getRentals/:userId', rentalController.getUserRentals);
 router.post('/rental/new', rentalController.newRental);
 router.put('/rental/finish/:rentalId', rentalController.finishRental);
 router.put('/rental/updateRoute/:rentalId', rentalController.updateRoute);
+router.get('/rental/checkActiveRental/:userId', rentalController.checkActiveRental);
 
 
 module.exports = router;

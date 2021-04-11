@@ -13,7 +13,7 @@ class App extends React.Component {
     render(){
         return (
             <Router>
-                <Route path="/*" component={NavBar}/>
+                {!this.props.rental.started ? <Route path="/*" component={NavBar}/> : null}
                 <Route exact path="/" component={Main}/>
                 <Switch>
                     <Route exact path="/login" render={() => !this.props.user.authenticated ? <Login/> : <Redirect to="/" />}/>

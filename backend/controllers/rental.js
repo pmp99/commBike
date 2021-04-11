@@ -86,11 +86,21 @@ exports.updateRoute = (req, res, next) => {
     const route = req.body.route;
     models.rental.findByPk(id)
         .then(rental => {
+            rental.end = Date.now()
             rental.route = JSON.stringify(route)
-            rental.save({fields: ["route"]})
+            rental.save({fields: ["end", "route"]})
                 .then((rental) => {
                     res.send(rental)
                 })
+        })
+        .catch(error => next(error));
+};
+
+exports.checkActiveRental = (req, res, next) => {
+    const id = req.params.userId;
+    models.rental.findOne({where: {userId: id, price: null}, include: {all: true}})
+        .then(rental => {
+            res.send(rental)
         })
         .catch(error => next(error));
 };

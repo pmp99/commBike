@@ -3,7 +3,7 @@ import * as turf from '@turf/turf'
 import {getZone} from '../../assets/zone'
 
 export const startRental = (userId, code) => dispatch => {
-    axios.post('rental/new', {userId, code})
+    axios.post('/rental/new', {userId, code})
         .then(res => {
             if (!res.data) {
                 dispatch({
@@ -26,7 +26,7 @@ export const startRental = (userId, code) => dispatch => {
 
 const bikeInside = async (bikeId) => {
     const zone = await getZone()
-    axios.get('bike/getBike/' + bikeId)
+    axios.get('/bike/getBike/' + bikeId)
         .then(res => {
             const pos = turf.point([res.data.long, res.data.lat])
             return turf.booleanPointInPolygon(pos, zone)
@@ -41,7 +41,7 @@ export const finishRental = (rentalId, bikeId) => dispatch => {
         })
         return;
     }
-    axios.put('rental/finish/'+rentalId)
+    axios.put('/rental/finish/'+rentalId)
         .then(res => {
             dispatch({
                 type: 'FINISH',
@@ -51,7 +51,7 @@ export const finishRental = (rentalId, bikeId) => dispatch => {
 }
 
 export const getRentals = () => dispatch => {
-    axios.get('rental/getRentals')
+    axios.get('/rental/getRentals')
         .then(res => {
             dispatch({
                 type: 'GET_RENTALS',
@@ -61,7 +61,7 @@ export const getRentals = () => dispatch => {
 }
 
 export const getUserRentals = (userId) => dispatch => {
-    axios.get('rental/getRentals/'+userId)
+    axios.get('/rental/getRentals/'+userId)
         .then(res => {
             dispatch({
                 type: 'GET_RENTALS',
@@ -84,5 +84,17 @@ export const updateRoute = (id, route) => dispatch => {
                 type: 'GET_RENTAL',
                 payload: res.data
             })
+        })
+}
+
+export const checkActiveRental = (id) => dispatch => {
+    axios.get('/rental/checkActiveRental/'+id)
+        .then(res => {
+            if (res.data.id !== undefined) {
+                dispatch({
+                    type: 'START',
+                    payload: res.data
+                })
+            }
         })
 }

@@ -3,8 +3,10 @@ import {connect} from "react-redux";
 import io from 'socket.io-client'
 import * as turf from '@turf/turf'
 import {getBike, updatePosition} from '../redux/actions/bike_actions';
-import {updateRoute, finishRental} from '../redux/actions/rental_actions';
+import {updateRoute, finishRental, resetRentalError} from '../redux/actions/rental_actions';
 import {getZone} from '../assets/zone'
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 
 class Riding extends Component {
     constructor(props) {
@@ -12,17 +14,25 @@ class Riding extends Component {
         this.state = {
             zona: [],
             centro: turf.point([-3.684997, 40.432885]),
-            error: "",
-            interval: null
+            time: "",
+            interval: null,
+            intervalTime: null
         }
         this.finishRental = this.finishRental.bind(this)
+        this.closeAlert = this.closeAlert.bind(this)
     }
 
     componentDidMount() {
         let interval = setInterval(() =>{
             this.updateBikePosition()
         }, 10000);
-        this.setState({interval: interval})
+        let intervalTime = setInterval(() =>{
+            this.updateTime()
+        }, 1000);
+        this.setState({
+            interval: interval,
+            intervalTime: intervalTime
+        })
         this.socket = io('/')
         this.socket.emit('refresh')
         this.props.getBike(this.props.rental.rental.bikeId)
@@ -44,6 +54,7 @@ class Riding extends Component {
 
     componentWillUnmount() {
         clearInterval(this.state.interval)
+        clearInterval(this.state.intervalTime)
         this.socket.emit('refresh')
     }
 
@@ -79,16 +90,58 @@ class Riding extends Component {
         this.props.updatePosition(this.props.rental.rental.bikeId, nextPos)
     }
 
+    updateTime() {
+        this.setState({
+            time: this.timeSince(this.props.rental.rental.start)
+        })
+    }
+
+    timeSince(date) {
+        let now = Date.now()
+        let time = Math.round((now - date)/1000)
+        let h = Math.floor(time/3600)
+        let m = Math.floor((time - h*3600)/60)
+        let s = time - 3600*h - 60*m
+        s = s < 10 ? '0'+s : s
+        m = m < 10 ? '0'+m : m
+        h = h < 10 ? '0'+h : h
+        return (h === '00' ? (m+':'+s) : (h+':'+m+':'+s))
+    }
+
+    closeAlert(event, reason) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.props.resetRentalError()
+    }
+
     render() {
+        const route = JSON.parse(this.props.rental.rental.route)
+        const line = route.length > 1 ? turf.lineString(route) : null
+        const dist = line !== null ? parseFloat(turf.length(line).toFixed(2)) : null
         return(
-            <div>
-                <h2>Inicio: {new Date(this.props.rental.rental.start).toLocaleTimeString()}</h2>
-                <button onClick={this.finishRental}>Finalizar viaje</button>
-                {this.state.error === "" ?
-                    <div style={{height: "8vh", backgroundColor: "#f0f0f0"}}/>
-                    :
-                    <div id="error"><h5 style={{margin: "auto auto"}}>{this.state.error}</h5></div>
-                }
+            <div className="backgroundRiding">
+                <h1 style={{textAlign: 'center'}}>Viaje en progreso</h1>
+                <div className="ridingInfoBlock">
+                    <div className="ridingInfoElement">
+                        <h3>Inicio</h3>
+                        <h2 className="ridingInfoText">{new Date(this.props.rental.rental.start).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}</h2>
+                    </div>
+                    <div className="ridingInfoElement">
+                        <h3>Distancia</h3>
+                        <h2 className="ridingInfoText">{dist} km</h2>
+                    </div>
+                    <div className="ridingInfoElement">
+                        <h3>Tiempo</h3>
+                        <h2 className="ridingInfoText">{this.state.time}</h2>
+                    </div>
+                </div>
+                <button className="mainButton" onClick={this.finishRental}>Finalizar viaje</button>
+                <Snackbar open={this.props.rental.error !== ""} autoHideDuration={3000} onClose={this.closeAlert}>
+                    <MuiAlert onClose={this.closeAlert} severity="error" variant="filled">
+                        {this.props.rental.error}
+                    </MuiAlert>
+                </Snackbar>
             </div>
         );
     }
@@ -98,4 +151,4 @@ function mapStateToProps(state) {
     return { ...state };
 }
 
-export default connect(mapStateToProps, {getBike, updatePosition, updateRoute, finishRental})(Riding);
+export default connect(mapStateToProps, {getBike, updatePosition, updateRoute, finishRental, resetRentalError})(Riding);
