@@ -50,6 +50,12 @@ export const finishRental = (rentalId, bikeId) => dispatch => {
         })
 }
 
+export const closeFinishScreen = () => dispatch => {
+        dispatch({
+            type: 'CLOSE_FINISH_SCREEN'
+        })
+}
+
 export const getRentals = () => dispatch => {
     axios.get('/rental/getRentals')
         .then(res => {

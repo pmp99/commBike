@@ -2,6 +2,7 @@ const initialState = {
     rentals: [],
     rental: {},
     started: false,
+    finished: false,
     error: ""
 }
 
@@ -27,7 +28,13 @@ export default function(state = initialState, action){
             return {
                 ...state,
                 rental: action.payload,
-                started: false
+                started: false,
+                finished: true
+            }
+        case 'CLOSE_FINISH_SCREEN':
+            return {
+                ...state,
+                finished: false
             }
         case 'RENTAL_ERROR':
             return {

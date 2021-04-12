@@ -4,6 +4,7 @@ import io from 'socket.io-client'
 import Map from "./Map";
 import BikeInfo from "./BikeInfo";
 import Riding from "./Riding";
+import Finish from "./Finish";
 import DialogAddBikes from "./DialogAddBikes";
 import DialogCode from "./DialogCode";
 import {startRental, checkActiveRental, resetRentalError} from "../redux/actions/rental_actions";
@@ -140,8 +141,12 @@ class Main extends Component {
                     );
             } else {
                 if (this.props.rental.started) {
-                    return(
+                    return (
                         <Riding/>
+                    );
+                } else if (this.props.rental.finished) {
+                    return (
+                        <Finish/>
                     );
                 } else {
                     return(

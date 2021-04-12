@@ -23,13 +23,16 @@ body {
 .backgroundMap {
     height: 92vh;
 }
-.backgroundRiding {
-    height: 100vh;
+.backgroundRiding, .backgroundFinish {
+    height: 92vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     box-shadow: inset 0 0 50px 0 rgb(167, 167, 167);
+}
+.backgroundFinish {
+    justify-content: start;
 }
 
 #navBar {
@@ -50,7 +53,7 @@ body {
     animation: animateTop1 2.5s;
 }
 
-.mainButton {
+.mainButton, .mainButtonFinish {
     cursor: pointer;
     padding: 0.8rem 1.25rem;
     width: 200px;
@@ -67,8 +70,11 @@ body {
     margin: 100px 50px;
     outline: none;
 }
-.mainButton:hover {
+.mainButton:hover, .mainButtonFinish:hover {
     background-color: #777777;
+}
+.mainButtonFinish {
+    margin: 20px;
 }
 
 #title {
@@ -498,17 +504,21 @@ select:-webkit-autofill:focus {
     transition-duration: 0.3s;
 }
 
-.ridingInfoBlock {
+.ridingInfoBlock, .ridingInfoBlockFinish {
     display: flex;
     justify-content: space-around;
     width: 100%;
     margin-top: 50px;
+}
+.ridingInfoBlockFinish {
+    margin: 10px;
 }
 .ridingInfoElement {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    width: 200px;
 }
 .ridingInfoText {
     color: #83bc00;

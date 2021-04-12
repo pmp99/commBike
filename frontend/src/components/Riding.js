@@ -44,7 +44,7 @@ class Riding extends Component {
             })
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.rental.error !== this.props.rental.error) {
             this.setState({
                 error: this.props.rental.error
@@ -121,7 +121,7 @@ class Riding extends Component {
         const dist = line !== null ? parseFloat(turf.length(line).toFixed(2)) : null
         return(
             <div className="backgroundRiding">
-                <h1 style={{textAlign: 'center'}}>Viaje en progreso</h1>
+                <h1 className="pageTitle">Viaje en progreso</h1>
                 <div className="ridingInfoBlock">
                     <div className="ridingInfoElement">
                         <h3>Inicio</h3>

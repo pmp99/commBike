@@ -53,7 +53,7 @@ class Map extends Component {
         })
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.props.bike.update) {
             this.props.getBikes()
         }
