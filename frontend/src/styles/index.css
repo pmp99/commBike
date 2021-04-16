@@ -366,6 +366,28 @@ select:-webkit-autofill:focus {
 .lockButton:hover, .lockButtonSmall:hover {
     background-color: darkgray;
 }
+.infoButton {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 5px;
+    width: 50px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    background-color: #2852d0;
+    color: white;
+    font-size: 12px;
+}
+.infoButton:hover {
+    background-color: #193a9d;
+    transition-duration: 0.3s;
+}
 .emptyButton {
     display: flex;
     background-color: transparent;

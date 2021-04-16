@@ -5,16 +5,21 @@ import io from 'socket.io-client'
 import * as turf from '@turf/turf'
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
+import PaymentIcon from '@material-ui/icons/Payment';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import DialogInfo from "./DialogInfo";
 
 class BikeInfo extends Component {
     constructor(props) {
         super(props);
         this.state = {
             dist: 0,
-            code: ""
+            code: "",
+            infoDialogOpen: false
         }
         this.toggleLockBike = this.toggleLockBike.bind(this)
+        this.closeInfo = this.closeInfo.bind(this)
+        this.openInfo = this.openInfo.bind(this)
     }
 
     componentDidMount() {
@@ -38,6 +43,18 @@ class BikeInfo extends Component {
         this.socket.emit('refresh')
     }
 
+    closeInfo() {
+        this.setState({
+            infoDialogOpen: false
+        })
+    }
+
+    openInfo() {
+        this.setState({
+            infoDialogOpen: true
+        })
+    }
+
     render() {
         let bike = this.props.bike.bike
         let color = bike.locked ? '#ff0606' : bike.inUse ? '#ff920a' : '#54ca13'
@@ -56,10 +73,12 @@ class BikeInfo extends Component {
                         <h2 style={{margin: "auto"}}>{bike.code}</h2>
                         {this.state.dist < 1 ? <h3 style={{margin: "auto"}}>Distancia: {Math.round(1000*this.state.dist)} m</h3> :
                             <h3 style={{margin: "auto"}}>Distancia: {Math.round(10*this.state.dist)/10} km</h3>}
+                        {!this.props.user.user.isAdmin ? <button className="infoButton" onClick={this.openInfo}><PaymentIcon fontSize="small"/>&nbsp;info</button> : null}
                     </div>
                     {this.props.user.user.isAdmin && !bike.inUse ? <button className="lockButton" onClick={(e) => this.toggleLockBike(bike.id, e)}>
                         {bike.locked ? <LockIcon fontSize="large"/> : <LockOpenIcon fontSize="large"/>}
                     </button> : null}
+                    <DialogInfo open={this.state.infoDialogOpen} handleClose={this.closeInfo}/>
                 </div>
             );
         }
