@@ -3,7 +3,7 @@ import * as turf from '@turf/turf'
 import {getZone} from '../../assets/zone'
 
 export const startRental = (userId, code) => dispatch => {
-    axios.post('/rental/new', {userId, code})
+    axios.post('/COMMBIKE-backend/rest/commBike/rental/new', {userId, code})
         .then(res => {
             if (!res.data) {
                 dispatch({
@@ -26,9 +26,9 @@ export const startRental = (userId, code) => dispatch => {
 
 const bikeInside = async (bikeId) => {
     const zone = await getZone()
-    axios.get('/bike/getBike/' + bikeId)
+    axios.get('/COMMBIKE-backend/rest/commBike/bike/getBike/' + bikeId)
         .then(res => {
-            const pos = turf.point([res.data.long, res.data.lat])
+            const pos = turf.point([res.data.longitude, res.data.latitude])
             return turf.booleanPointInPolygon(pos, zone)
         })
 }
@@ -41,7 +41,7 @@ export const finishRental = (rentalId, bikeId) => dispatch => {
         })
         return;
     }
-    axios.put('/rental/finish/'+rentalId)
+    axios.put('/COMMBIKE-backend/rest/commBike/rental/finish/'+rentalId)
         .then(res => {
             dispatch({
                 type: 'FINISH',
@@ -57,7 +57,7 @@ export const closeFinishScreen = () => dispatch => {
 }
 
 export const getRentals = () => dispatch => {
-    axios.get('/rental/getRentals')
+    axios.get('/COMMBIKE-backend/rest/commBike/rental/getRentals')
         .then(res => {
             dispatch({
                 type: 'GET_RENTALS',
@@ -67,7 +67,7 @@ export const getRentals = () => dispatch => {
 }
 
 export const getUserRentals = (userId) => dispatch => {
-    axios.get('/rental/getRentals/'+userId)
+    axios.get('/COMMBIKE-backend/rest/commBike/rental/getRentals/'+userId)
         .then(res => {
             dispatch({
                 type: 'GET_RENTALS',
@@ -83,8 +83,9 @@ export const resetRentalError = () => dispatch => {
     })
 }
 
-export const updateRoute = (id, route) => dispatch => {
-    axios.put('/rental/updateRoute/'+id, {route})
+export const updateRoute = (id, ruta) => dispatch => {
+    const route = JSON.stringify(ruta)
+    axios.put('/COMMBIKE-backend/rest/commBike/rental/updateRoute/'+id, {route})
         .then(res => {
             dispatch({
                 type: 'GET_RENTAL',
@@ -94,7 +95,7 @@ export const updateRoute = (id, route) => dispatch => {
 }
 
 export const checkActiveRental = (id) => dispatch => {
-    axios.get('/rental/checkActiveRental/'+id)
+    axios.get('/COMMBIKE-backend/rest/commBike/rental/checkActiveRental/'+id)
         .then(res => {
             if (res.data.id !== undefined) {
                 dispatch({

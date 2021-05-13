@@ -4,19 +4,21 @@ export const loginUser = user => dispatch => {
     let email = user.email;
     let password = user.password;
 
-    axios.post('/user/login', {email, password})
+    axios.post('/COMMBIKE-backend/rest/commBike/user/login', {email, password})
         .then(res => {
+            console.log(res.data)
             if (!res.data) {
                 dispatch({
                     type: 'USER_ERROR',
                     payload: "Datos de inicio de sesión incorrectos"
                 })
             } else {
+                console.log(res.data)
                 const session = {
                     user: {
                         name: res.data.name,
                         email: res.data.email,
-                        isAdmin: res.data.isAdmin,
+                        admin: res.data.admin,
                         id: res.data.id
                     }
                 }
@@ -31,14 +33,14 @@ export const registerUser = user => dispatch => {
     const password = user.password;
     const password2 = user.password2;
     const email = user.email;
-    axios.post('/user/register', {name, password, password2, email})
+    axios.post('/COMMBIKE-backend/rest/commBike/user/register', {name, password, password2, email})
         .then(res => {
             if(res.data.success){
                 const session = {
                     user: {
                         name: res.data.data.name,
                         email: res.data.data.email,
-                        isAdmin: res.data.data.isAdmin,
+                        admin: res.data.data.admin,
                         id: res.data.data.id
                     }
                 }
@@ -76,13 +78,13 @@ export const logoutUser = () => dispatch => {
 export const editUser = (user, id) => dispatch => {
     const name = user.name;
     const email = user.email;
-    axios.put('/user/edit/'+id, {name, email})
+    axios.put('/COMMBIKE-backend/rest/commBike/user/edit/'+id, {name, email})
         .then(res => {
             const session = {
                 user: {
                     name: res.data.name,
                     email: res.data.email,
-                    isAdmin: res.data.isAdmin,
+                    admin: res.data.admin,
                     id: res.data.id
                 }
             }
@@ -99,7 +101,7 @@ export const changePassword = (passwords, id) => dispatch => {
     const oldPassword = passwords.oldPassword;
     const newPassword = passwords.newPassword;
     const newPassword2 = passwords.newPassword2;
-    axios.put('/user/password/'+id, {oldPassword, newPassword, newPassword2})
+    axios.put('/COMMBIKE-backend/rest/commBike/user/password/'+id, {oldPassword, newPassword, newPassword2})
         .then(res => {
             if (!res.data.success) {
                 dispatch({
@@ -111,7 +113,7 @@ export const changePassword = (passwords, id) => dispatch => {
                     user: {
                         name: res.data.data.name,
                         email: res.data.data.email,
-                        isAdmin: res.data.data.isAdmin,
+                        admin: res.data.data.admin,
                         id: res.data.data.id
                     }
                 }

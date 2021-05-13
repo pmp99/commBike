@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import {connect} from "react-redux";
-import io from 'socket.io-client'
 import {toggleLockBike, getBikes} from '../redux/actions/bike_actions'
 import SortIcon from "@material-ui/icons/Sort";
 import LockIcon from "@material-ui/icons/Lock";
@@ -16,7 +15,8 @@ class Bikes extends Component {
         this.state = {
             bikes: null,
             sort: 0,
-            showGoUpButton: false
+            showGoUpButton: false,
+            interval: null
         }
         this.toggleLockBike = this.toggleLockBike.bind(this)
         this.goUp = this.goUp.bind(this)
@@ -25,9 +25,11 @@ class Bikes extends Component {
 
     componentDidMount() {
         this.props.getBikes()
-        this.socket = io('/')
-        this.socket.on('refresh', () => {
-            this.props.getBikes()
+        let interval = setInterval(() =>{
+            this.refresh()
+        }, 3000);
+        this.setState({
+            interval: interval
         })
         window.addEventListener('scroll', this.handleScroll)
     }
@@ -44,7 +46,12 @@ class Bikes extends Component {
     }
 
     componentWillUnmount() {
+        clearInterval(this.state.interval)
         window.removeEventListener('scroll', this.handleScroll)
+    }
+
+    refresh(){
+        this.props.getBikes()
     }
 
     handleScroll() {
@@ -62,7 +69,6 @@ class Bikes extends Component {
     toggleLockBike(id, e){
         e.preventDefault()
         this.props.toggleLockBike(id)
-        this.socket.emit('refresh')
     }
 
     sort(bikes, type) {
@@ -111,8 +117,8 @@ class Bikes extends Component {
                 return (
                     <div key={bike.id} className="bike" style={{backgroundColor: backgroundColor}}>
                         <div className="bikeLocation">
-                            <h6 style={{margin: 'auto'}}>Lat: {bike.lat.toFixed(5)}</h6>
-                            <h6 style={{margin: 'auto'}}>Long: {bike.long.toFixed(5)}</h6>
+                            <h6 style={{margin: 'auto'}}>Lat: {bike.latitude.toFixed(5)}</h6>
+                            <h6 style={{margin: 'auto'}}>Long: {bike.longitude.toFixed(5)}</h6>
                         </div>
                         <div className="rentalBike">
                             <DirectionsBikeIcon/><h5 className="rentalBikeText">{bike.code}</h5>

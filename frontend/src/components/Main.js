@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {connect} from "react-redux";
-import io from 'socket.io-client'
 import Map from "./Map";
 import BikeInfo from "./BikeInfo";
 import Riding from "./Riding";
@@ -36,7 +35,6 @@ class Main extends Component {
     }
 
     componentDidMount() {
-        this.socket = io('/')
         navigator.geolocation.getCurrentPosition((position) => {
             const long = position.coords.longitude
             const lat = position.coords.latitude
@@ -81,7 +79,6 @@ class Main extends Component {
                 addBikesDialogOpen: false
             }, () => {
                 this.props.newBikes(parseInt(this.state.number))
-                this.socket.emit('refresh')
             })
         } else {
             this.setState({
@@ -125,7 +122,7 @@ class Main extends Component {
 
     render() {
         if (this.props.user.authenticated) {
-            if (this.props.user.user.isAdmin) {
+            if (this.props.user.user.admin) {
                 return(
                     <div className="backgroundMap">
                         <Map/>

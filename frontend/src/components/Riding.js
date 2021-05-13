@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import {connect} from "react-redux";
-import io from 'socket.io-client'
 import * as turf from '@turf/turf'
 import {getBike, updatePosition} from '../redux/actions/bike_actions';
 import {updateRoute, finishRental, resetRentalError} from '../redux/actions/rental_actions';
@@ -33,8 +32,6 @@ class Riding extends Component {
             interval: interval,
             intervalTime: intervalTime
         })
-        this.socket = io('/')
-        this.socket.emit('refresh')
         this.props.getBike(this.props.rental.rental.bikeId)
         getZone()
             .then(zone => {
@@ -55,7 +52,6 @@ class Riding extends Component {
     componentWillUnmount() {
         clearInterval(this.state.interval)
         clearInterval(this.state.intervalTime)
-        this.socket.emit('refresh')
     }
 
     finishRental() {

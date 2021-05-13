@@ -3,7 +3,6 @@ import {connect} from "react-redux";
 import MapGL, { NavigationControl, GeolocateControl, ScaleControl, Source, Layer } from '@urbica/react-map-gl';
 import Cluster from '@urbica/react-map-gl-cluster';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import io from 'socket.io-client'
 import BikeMarker from './BikeMarker'
 import ClusterMarker from './ClusterMarker'
 import {getBikes, getBike, showBike, hideBike, resetBike} from '../redux/actions/bike_actions';
@@ -19,7 +18,8 @@ class Map extends Component {
                 longitude: -3.6799,
                 zoom: 10
             },
-            zona: []
+            zona: [],
+            interval: null
         }
         this.setViewport = this.setViewport.bind(this)
         this.onMarkerClick = this.onMarkerClick.bind(this)
@@ -44,12 +44,11 @@ class Map extends Component {
                     zona: zone.geometry.coordinates[0]
                 })
             })
-        this.socket = io('/')
-        this.socket.on('refresh', () => {
-            this.props.getBikes()
-            if (this.props.bike.bike.id !== undefined) {
-                this.props.getBike(this.props.bike.bike.id)
-            }
+        let interval = setInterval(() =>{
+            this.refresh()
+        }, 3000);
+        this.setState({
+            interval: interval
         })
     }
 
@@ -62,9 +61,20 @@ class Map extends Component {
                 bikes: this.props.bike.bikes
             })
         }
-        if ((this.props.bike.bike.locked || this.props.bike.bike.inUse) && !this.props.user.user.isAdmin && this.props.bike.showBike) {
+        if ((this.props.bike.bike.locked || this.props.bike.bike.inUse) && !this.props.user.user.admin && this.props.bike.showBike) {
             this.props.hideBike()
             this.props.resetBike()
+        }
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.state.interval)
+    }
+
+    refresh(){
+        this.props.getBikes()
+        if (this.props.bike.bike.id !== undefined) {
+            this.props.getBike(this.props.bike.bike.id)
         }
     }
 
@@ -98,13 +108,13 @@ class Map extends Component {
         };
 
         const bikeMarkers = this.state.bikes.map((bike) => {
-            if (!(bike.locked || bike.inUse) || this.props.user.user.isAdmin) {
+            if (!(bike.locked || bike.inUse) || this.props.user.user.admin) {
                 let selected = this.props.bike.showBike && this.props.bike.bike.id === bike.id
                 return(
                     <BikeMarker
-                        key={bike.id + bike.locked.toString() + selected.toString()}
-                        longitude={bike.long}
-                        latitude={bike.lat}
+                        key={bike.id + bike.locked.toString() + bike.inUse.toString() + selected.toString()}
+                        longitude={bike.longitude}
+                        latitude={bike.latitude}
                         id={bike.id}
                         locked={bike.locked}
                         inUse={bike.inUse}

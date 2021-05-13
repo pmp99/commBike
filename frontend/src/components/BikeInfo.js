@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import {connect} from "react-redux";
 import {toggleLockBike, getBikes} from '../redux/actions/bike_actions'
-import io from 'socket.io-client'
 import * as turf from '@turf/turf'
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
@@ -22,14 +21,10 @@ class BikeInfo extends Component {
         this.openInfo = this.openInfo.bind(this)
     }
 
-    componentDidMount() {
-        this.socket = io('/')
-    }
-
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.bike.bike !== this.props.bike.bike) {
-            const lat2 = this.props.bike.bike.lat
-            const long2 = this.props.bike.bike.long
+            const lat2 = this.props.bike.bike.latitude
+            const long2 = this.props.bike.bike.longitude
             let d = turf.distance(turf.point(this.props.geolocation), turf.point([long2, lat2]))
             this.setState({
                 dist: d
@@ -40,7 +35,6 @@ class BikeInfo extends Component {
     toggleLockBike(id, e){
         e.preventDefault()
         this.props.toggleLockBike(id)
-        this.socket.emit('refresh')
     }
 
     closeInfo() {
@@ -73,9 +67,9 @@ class BikeInfo extends Component {
                         <h2 style={{margin: "auto"}}>{bike.code}</h2>
                         {this.state.dist < 1 ? <h3 style={{margin: "auto"}}>Distancia: {Math.round(1000*this.state.dist)} m</h3> :
                             <h3 style={{margin: "auto"}}>Distancia: {Math.round(10*this.state.dist)/10} km</h3>}
-                        {!this.props.user.user.isAdmin ? <button className="infoButton" onClick={this.openInfo}><PaymentIcon fontSize="small"/>&nbsp;info</button> : null}
+                        {!this.props.user.user.admin ? <button className="infoButton" onClick={this.openInfo}><PaymentIcon fontSize="small"/>&nbsp;info</button> : null}
                     </div>
-                    {this.props.user.user.isAdmin && !bike.inUse ? <button className="lockButton" onClick={(e) => this.toggleLockBike(bike.id, e)}>
+                    {this.props.user.user.admin && !bike.inUse ? <button className="lockButton" onClick={(e) => this.toggleLockBike(bike.id, e)}>
                         {bike.locked ? <LockIcon fontSize="large"/> : <LockOpenIcon fontSize="large"/>}
                     </button> : null}
                     <DialogInfo open={this.state.infoDialogOpen} handleClose={this.closeInfo}/>

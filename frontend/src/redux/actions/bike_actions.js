@@ -3,7 +3,7 @@ import * as turf from '@turf/turf'
 import {getZone} from '../../assets/zone'
 
 export const getBikes = () => dispatch => {
-    axios.get('/bike/getBikes')
+    axios.get('/COMMBIKE-backend/rest/commBike/bike/getBikes')
         .then(res => {
             dispatch({
                 type: 'GET_BIKES',
@@ -13,7 +13,7 @@ export const getBikes = () => dispatch => {
 }
 
 export const getBike = (id) => dispatch => {
-    axios.get('/bike/getBike/'+id)
+    axios.get('/COMMBIKE-backend/rest/commBike/bike/getBike/'+id)
         .then(res => {
             dispatch({
                 type: 'GET_BIKE',
@@ -58,7 +58,7 @@ export const newBikes = (number) => async dispatch => {
             i++
         }
     }
-    axios.post('/bike/newBikes', {pos})
+    axios.post('/COMMBIKE-backend/rest/commBike/bike/newBikes', {pos})
         .then(res => {
             dispatch({
                 type: 'GET_BIKES',
@@ -68,7 +68,7 @@ export const newBikes = (number) => async dispatch => {
 }
 
 export const toggleLockBike = (id) => dispatch => {
-    axios.put('/bike/toggleLockBike/'+id)
+    axios.put('/COMMBIKE-backend/rest/commBike/bike/toggleLockBike/'+id)
         .then(res => {
             dispatch({
                 type: 'TOGGLE_LOCK',
@@ -78,7 +78,7 @@ export const toggleLockBike = (id) => dispatch => {
 }
 
 export const updatePosition = (id, pos) => dispatch => {
-    axios.put('/bike/updatePos/'+id, {pos})
+    axios.put('/COMMBIKE-backend/rest/commBike/bike/updatePos/'+id, {pos})
         .then(res => {
             dispatch({
                 type: 'GET_BIKE',

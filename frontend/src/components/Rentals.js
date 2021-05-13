@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import {connect} from "react-redux";
-import io from 'socket.io-client'
 import MapGL, {Source, Layer, Marker} from '@urbica/react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import * as turf from '@turf/turf'
@@ -26,18 +25,21 @@ class Rentals extends Component {
             sort: 0,
             filterUser: "",
             loaded: [],
-            showGoUpButton: false
+            showGoUpButton: false,
+            interval: null
         }
         this.goUp = this.goUp.bind(this)
         this.handleScroll = this.handleScroll.bind(this)
     }
 
     componentDidMount() {
-        if (this.props.user.user.isAdmin) {
+        if (this.props.user.user.admin) {
             this.props.getRentals()
-            this.socket = io('/')
-            this.socket.on('refresh', () => {
-                this.props.getRentals()
+            let interval = setInterval(() =>{
+                this.refresh()
+            }, 3000);
+            this.setState({
+                interval: interval
             })
         } else {
             this.props.getUserRentals(this.props.user.user.id)
@@ -54,7 +56,12 @@ class Rentals extends Component {
     }
 
     componentWillUnmount() {
+        clearInterval(this.state.interval)
         window.removeEventListener('scroll', this.handleScroll)
+    }
+
+    refresh(){
+        this.props.getRentals()
     }
 
     handleScroll() {
@@ -183,7 +190,8 @@ class Rentals extends Component {
                     <tr key={rental.id} className="rental" style={{backgroundColor: backgroundColor}}>
                         {route.length > 1 ?
                             <MapGL
-                                style={{width: '300px', height: '100%', borderRadius: "10px 0 0 10px", borderRight: "1px solid black"}}
+                                key={rental.id + rental.route.length}
+                                style={{width: '300px', height: '100%', borderRadius: "10px 0 0 10px", borderRight: "1px solid black", backgroundColor: "#e6e4e0"}}
                                 mapStyle='mapbox://styles/mapbox/streets-v11'
                                 accessToken={'pk.eyJ1IjoicG1wOTkiLCJhIjoiY2tsbTkzYWNxMDZ3OTMzbzhobnNsZ3o1YSJ9.mCi3-eRyASTCvR--ws9Ncg'}
                                 latitude={0}
@@ -218,7 +226,7 @@ class Rentals extends Component {
                             : null}
                         {this.state.loaded[rental.id] ? null : <div className="rentalMapLoading"><CircularProgress style={{color: "black"}}/></div>}
                         <div style={{display: "flex", flexDirection: "column", flexGrow: "1", justifyContent: "space-between", position: "relative"}}>
-                            {this.props.user.user.isAdmin ?
+                            {this.props.user.user.admin ?
                                 <div className="rentalUser">
                                     <PersonIcon/><h4 className="rentalUserText">{rental.user.name}</h4>
                                     <EmailIcon/><h4 className="rentalEmailText">{rental.user.email}</h4>
@@ -241,7 +249,7 @@ class Rentals extends Component {
 
             return(
                 <div className="background">
-                    <h1 className="pageTitle">{this.props.user.user.isAdmin ? 'Viajes' : 'Mis viajes'}</h1>
+                    <h1 className="pageTitle">{this.props.user.user.admin ? 'Viajes' : 'Mis viajes'}</h1>
                     <div style={{display: "flex", justifyContent: "space-between", width: "80%", margin: "20px"}}>
                         <div className="sortByBox">
                             <SortIcon/>
@@ -251,17 +259,17 @@ class Rentals extends Component {
                                 <option value="2">Coste</option>
                                 <option value="3">Más largo</option>
                                 <option value="4">Más corto</option>
-                                {this.props.user.user.isAdmin ?
+                                {this.props.user.user.admin ?
                                     <option value="5">Usuario (a-z)</option>
                                     : null
                                 }
-                                {this.props.user.user.isAdmin ?
+                                {this.props.user.user.admin ?
                                     <option value="6">Usuario (z-a)</option>
                                     : null
                                 }
                             </select>
                         </div>
-                        {this.props.user.user.isAdmin ?
+                        {this.props.user.user.admin ?
                         <div className="sortByBox">
                             <input className="filter" placeholder="Usuario" onChange={(e) => this.setState({filterUser: e.target.value})} value={this.state.filterUser}/>
                             <FilterListIcon/>

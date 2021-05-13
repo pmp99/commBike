@@ -23,7 +23,6 @@
     "react-scripts": "4.0.3",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "socket.io-client": "^3.1.2",
     "web-vitals": "^1.0.1",
     "worker-loader": "^3.0.8"
   },
@@ -51,5 +50,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:8080"
 }
